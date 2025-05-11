@@ -37,25 +37,43 @@ of regions in the process’s virtual address space
 
 
 Design Details
- // If ASLR is enabled, change the load offset
+ // If ASLR is enabled, change the load offset 
+ 
  if(aslr_enabled){
+ 
  loff = random();  // Generate a random offset for ASLR
+ 
  // For addresses from 0 to loff, map them to 0 to reserve the space
+ 
  sz = allocuvm(pgdir, 0, loff);  // Allocate memory up to the offset
+ 
  // Apply the offset to the program segment's virtual address
+ 
  ph.vaddr += loff;
+ 
  // Allocate memory for the program segment with the offset 
 applied
+
  if((sz = allocuvm(pgdir, sz, ph.vaddr + ph.memsz)) == 0)
+ 
  sz = PGROUNDUP(sz);
+ 
  uint soff = 2;
+ 
  // If ASLR is enabled, change the stack offset
+ 
  if(aslr_enabled){
  soff += (random()/2) % 500 + 1;
  }
+ 
  if((sz = allocuvm(pgdir, sz, sz + soff*PGSIZE)) == 
 0)
+
  goto bad;
+ 
  clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
+ 
  sp = sz;
+ 
  goto bad;
+ 
